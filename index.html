@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>浄水場 〜水ができるまで ものしり問答〜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700;900&family=Klee+One:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --mizu:#1c8fc4;        /* 水色 */
+    --mizu-fuka:#0e5f88;   /* 深い水色 */
+    --mizu-akarui:#7fd0ec; /* 明るい水色 */
+    --sora:#dff1fb;        /* 空色 */
+    --shiro:#f3fbff;       /* しろ（紙） */
+    --shiro-kage:#dceef8;
+    --midori:#4caf8a;      /* みどり（さわやか） */
+    --sumi:#123443;        /* 文字の色 */
+    --sumi-usu:rgba(255,255,255,.78);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    font-family:'Zen Maru Gothic',sans-serif;
+    background:
+      radial-gradient(ellipse at 50% -10%, #6fc4e8 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 120%, #bfe6f6 0%, transparent 55%),
+      linear-gradient(180deg,#9fd6ef,#cdeafa);
+    color:var(--sumi);
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    overflow-x:hidden;
+    position:relative;
+  }
+  /* 水面のさざなみ風テクスチャ */
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 1px, transparent 1px 5px);
+    pointer-events:none;z-index:0;
+  }
+
+  /* ヘッダー */
+  header{
+    position:relative;z-index:2;
+    text-align:center;
+    padding:18px 16px 12px;
+    border-bottom:4px solid #fff;
+    background:linear-gradient(180deg, rgba(28,143,196,.92), rgba(14,95,136,.92));
+    box-shadow:0 4px 18px rgba(14,95,136,.35);
+  }
+  .mon{
+    display:inline-flex;align-items:center;gap:14px;
+  }
+  .mon-maru{
+    width:46px;height:46px;border-radius:50%;
+    border:3px solid #fff;
+    display:grid;place-items:center;
+    font-family:'Mochiy Pop One',sans-serif;font-size:22px;color:#fff;
+    background:radial-gradient(circle,#3eb0dd,#1c8fc4);
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+  }
+  h1{
+    font-family:'Mochiy Pop One',sans-serif;
+    font-size:clamp(24px,4vw,46px);
+    color:#fff;
+    letter-spacing:.06em;
+    text-shadow:0 2px 0 rgba(14,95,136,.6),0 0 16px rgba(255,255,255,.4);
+  }
+  .sub{
+    font-size:clamp(13px,1.5vw,18px);
+    color:var(--sumi-usu);
+    margin-top:6px;letter-spacing:.14em;
+  }
+
+  /* メイン */
+  main{
+    position:relative;z-index:2;
+    flex:1;
+    width:min(1100px,94vw);
+    margin:0 auto;
+    padding:22px 0 30px;
+    display:flex;flex-direction:column;gap:20px;
+  }
+
+  /* 語り場 */
+  .stage{
+    display:flex;align-items:flex-start;gap:22px;
+  }
+  .person{
+    flex:0 0 auto;
+    width:clamp(120px,15vw,180px);
+    text-align:center;
+  }
+  .face{
+    width:clamp(120px,15vw,180px);
+    height:clamp(120px,15vw,180px);
+    border-radius:50%;
+    overflow:hidden;
+    background:#eaf6fc;
+    border:5px solid #fff;
+    box-shadow:0 0 0 4px var(--mizu),0 10px 28px rgba(14,95,136,.45);
+    position:relative;
+    transition:transform .25s;
+  }
+  .face .mouth{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .face .mouth.closed{z-index:1;}
+  .face .mouth.open{z-index:2;opacity:0;}   /* ふだんは閉じた口。話すとき重ねて見せる */
+  .face.talking-open .mouth.open{opacity:1;}
+  .face.no-img .mouth{display:none;}
+  .face-fallback{
+    display:none;
+    position:absolute;inset:0;z-index:3;
+    width:100%;height:100%;
+    align-items:center;justify-content:center;
+    font-family:'Mochiy Pop One',sans-serif;
+    font-size:clamp(16px,2.2vw,26px);line-height:1.2;
+    color:var(--mizu-fuka);letter-spacing:.02em;text-align:center;
+    background:radial-gradient(circle at 50% 38%, #eaf6fc, #cfe9f6);
+  }
+  .face.no-img .face-fallback{display:flex;}
+  .name-tag{
+    margin-top:10px;font-family:'Zen Maru Gothic',sans-serif;font-weight:900;
+    font-size:clamp(15px,1.9vw,22px);color:var(--mizu-fuka);letter-spacing:.06em;
+  }
+
+  /* 吹き出し */
+  .scroll{
+    flex:1;position:relative;
+    background:linear-gradient(180deg,var(--shiro),var(--shiro-kage));
+    color:var(--sumi);
+    border-radius:18px;
+    padding:26px 30px;
+    min-height:170px;
+    box-shadow:0 12px 30px rgba(14,95,136,.30),inset 0 0 0 3px rgba(28,143,196,.18);
+    border:3px solid #fff;
+  }
+  .scroll::before{ /* 吹き出しのしっぽ */
+    content:"";position:absolute;left:-18px;top:48px;
+    border-style:solid;border-width:14px 18px 14px 0;
+    border-color:transparent #fff transparent transparent;
+  }
+  .scroll .answer{
+    font-family:'Klee One',serif;
+    font-size:clamp(19px,2.5vw,30px);
+    line-height:1.8;font-weight:600;
+    letter-spacing:.01em;
+  }
+  .scroll .answer .em{color:var(--mizu-fuka);font-weight:700;}
+
+  /* 質問エリア */
+  .ask-zone{
+    background:rgba(255,255,255,.82);
+    border:3px solid #fff;
+    border-radius:18px;
+    padding:18px 20px;
+    box-shadow:0 8px 22px rgba(14,95,136,.22);
+  }
+  .ask-zone .label{
+    font-size:clamp(15px,1.7vw,20px);color:var(--mizu-fuka);
+    margin-bottom:12px;letter-spacing:.06em;font-weight:900;
+  }
+  .input-row{display:flex;gap:12px;flex-wrap:wrap;}
+  #q{
+    flex:1;min-width:220px;
+    font-family:'Zen Maru Gothic',sans-serif;
+    font-size:clamp(18px,2.2vw,26px);font-weight:500;
+    padding:14px 18px;border-radius:12px;border:2px solid var(--mizu-akarui);
+    background:#fff;color:var(--sumi);
+  }
+  #q:focus{outline:3px solid var(--mizu);}
+  .btn-ask{
+    font-family:'Mochiy Pop One',sans-serif;
+    font-size:clamp(17px,2.1vw,24px);
+    padding:14px 28px;border:none;border-radius:12px;cursor:pointer;
+    background:linear-gradient(180deg,#2aa6dd,#1577a8);
+    color:#fff;letter-spacing:.06em;
+    box-shadow:0 4px 0 #0e5f88,0 6px 14px rgba(14,95,136,.4);
+    transition:transform .08s;
+  }
+  .btn-ask:active{transform:translateY(4px);box-shadow:0 1px 0 #0e5f88;}
+
+  /* おすすめ問い */
+  .topics{margin-top:2px;}
+  .topics .t-label{font-size:clamp(13px,1.5vw,17px);color:var(--mizu-fuka);margin:6px 2px 12px;letter-spacing:.04em;font-weight:700;}
+  .chips{display:flex;flex-wrap:wrap;gap:10px;}
+  .chip{
+    font-family:'Zen Maru Gothic',sans-serif;font-weight:700;
+    font-size:clamp(14px,1.7vw,19px);
+    padding:10px 18px;border-radius:999px;cursor:pointer;
+    background:rgba(255,255,255,.7);
+    color:var(--mizu-fuka);
+    border:2px solid var(--mizu);
+    transition:all .15s;
+  }
+  .chip:hover{background:var(--mizu);color:#fff;transform:translateY(-2px);}
+
+  /* 顔のリアクション */
+  .face.seikai{box-shadow:0 0 0 4px var(--mizu),0 0 34px 8px rgba(127,208,236,.95),0 10px 28px rgba(14,95,136,.45);}
+
+  footer{
+    position:relative;z-index:2;text-align:center;
+    font-size:13px;color:rgba(255,255,255,.85);
+    padding:14px;letter-spacing:.06em;
+    text-shadow:0 1px 2px rgba(14,95,136,.4);
+  }
+  @media(max-width:560px){
+    .stage{flex-direction:column;align-items:center;}
+    .scroll::before{display:none;}
+    .person{order:-1;}
+  }
+
+  /* ===== モード切りかえタブ ===== */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:4px;}
+  .tab{
+    font-family:'Zen Maru Gothic',sans-serif;font-weight:900;
+    font-size:clamp(14px,1.8vw,20px);
+    padding:10px 20px;border-radius:999px;cursor:pointer;
+    background:rgba(255,255,255,.55);color:var(--mizu-fuka);
+    border:2px solid #fff;box-shadow:0 3px 10px rgba(14,95,136,.18);
+    transition:all .15s;
+  }
+  .tab:hover{transform:translateY(-2px);}
+  .tab.active{
+    background:linear-gradient(180deg,#2aa6dd,#1577a8);color:#fff;border-color:#fff;
+    box-shadow:0 4px 0 #0e5f88,0 6px 14px rgba(14,95,136,.4);
+  }
+
+  .panel{display:none;}
+  .panel.show{display:block;}
+
+  /* ===== クイズ・ながれ・たび 共通の箱 ===== */
+  .quiz-zone,.flow-zone,.journey-zone{
+    background:rgba(255,255,255,.82);border:3px solid #fff;border-radius:18px;
+    padding:20px;box-shadow:0 8px 22px rgba(14,95,136,.22);
+  }
+
+  /* ===== クイズ ===== */
+  .quiz-status{
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+    font-weight:900;color:var(--mizu-fuka);
+    font-size:clamp(15px,1.8vw,20px);margin-bottom:14px;
+  }
+  .quiz-choices{display:flex;flex-direction:column;gap:12px;}
+  .choice{
+    font-family:'Zen Maru Gothic',sans-serif;font-weight:700;
+    font-size:clamp(16px,2vw,23px);text-align:left;
+    padding:14px 20px;border-radius:14px;cursor:pointer;
+    background:#fff;color:var(--sumi);border:3px solid var(--mizu-akarui);
+    transition:all .12s;
+  }
+  .choice:hover:not(:disabled){background:var(--sora);transform:translateY(-2px);}
+  .choice:disabled{cursor:default;opacity:.96;}
+  .choice.correct{background:#d6f5e4;border-color:#3fb37a;color:#1c6b46;}
+  .choice.wrong{background:#fadcdc;border-color:#d07070;color:#8a2f2f;}
+  .quiz-next,.flow-btn,.journey-btn{
+    font-family:'Mochiy Pop One',sans-serif;font-size:clamp(15px,1.9vw,22px);
+    padding:13px 26px;border:none;border-radius:12px;cursor:pointer;
+    background:linear-gradient(180deg,#2aa6dd,#1577a8);color:#fff;
+    box-shadow:0 4px 0 #0e5f88,0 6px 14px rgba(14,95,136,.4);
+    transition:transform .08s;margin-top:16px;
+  }
+  .quiz-next:active,.journey-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #0e5f88;}
+  .quiz-next.hidden{display:none;}
+
+  /* ===== ながれ図 ===== */
+  .flow-track{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;justify-content:center;}
+  .flow-step{
+    flex:1 1 100px;max-width:150px;border-radius:14px;cursor:pointer;
+    background:#fff;border:3px solid var(--mizu-akarui);
+    padding:12px 8px;text-align:center;transition:all .15s;
+  }
+  .flow-step:hover{transform:translateY(-3px);}
+  .flow-step.active{background:var(--mizu);border-color:#fff;color:#fff;box-shadow:0 6px 16px rgba(14,95,136,.4);}
+  .flow-step .num{
+    display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;
+    background:var(--mizu);color:#fff;font-weight:900;font-size:14px;margin-bottom:6px;
+  }
+  .flow-step.active .num{background:#fff;color:var(--mizu);}
+  .flow-step .nm{font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:clamp(13px,1.6vw,17px);line-height:1.3;}
+  .water-sample{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .glass{
+    width:84px;height:104px;border-radius:8px 8px 16px 16px;
+    border:4px solid #cfe9f6;border-top:none;overflow:hidden;position:relative;background:#fff;
+  }
+  .glass .liquid{position:absolute;left:0;right:0;bottom:0;height:80%;background:#9c7b4a;transition:background .5s;}
+  .sample-label{font-weight:900;color:var(--mizu-fuka);font-size:clamp(15px,1.9vw,21px);}
+
+  /* ===== 水のたび ===== */
+  .journey-zone{text-align:center;}
+  .journey-progress{font-weight:900;color:var(--mizu-fuka);margin-bottom:8px;font-size:clamp(14px,1.7vw,19px);}
+  .journey-scene{font-size:clamp(46px,9vw,68px);line-height:1.1;margin:6px 0 14px;}
+  .journey-controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .journey-btn.ghost{background:#fff;color:var(--mizu-fuka);border:3px solid var(--mizu);box-shadow:0 4px 0 #cfe9f6;}
+
+  /* ながれ図の イラスト */
+  .flow-fig{margin:0 0 14px;text-align:center;}
+  .flow-img-wrap{position:relative;display:inline-block;width:100%;max-width:820px;line-height:0;}
+  .flow-img-wrap img{display:block;width:100%;height:auto;border-radius:12px;border:3px solid #fff;box-shadow:0 6px 16px rgba(14,95,136,.25);background:#fff;}
+  .flow-pin{
+    position:absolute;top:5px;transform:translateX(-50%);
+    width:clamp(20px,3.2vw,28px);height:clamp(20px,3.2vw,28px);border-radius:50%;
+    display:grid;place-items:center;font-family:inherit;font-weight:900;
+    font-size:clamp(11px,1.8vw,15px);line-height:1;padding:0;cursor:pointer;
+    background:#fff;color:var(--mizu-fuka);border:2px solid var(--mizu);
+    box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:3;transition:all .15s;
+  }
+  .flow-pin:hover{transform:translateX(-50%) scale(1.12);}
+  .flow-pin.active{background:var(--mizu);color:#fff;transform:translateX(-50%) scale(1.3);box-shadow:0 0 0 4px rgba(127,208,236,.75),0 2px 6px rgba(0,0,0,.3);}
+  .flow-band{position:absolute;top:0;height:100%;background:rgba(255,212,84,.32);border-left:3px dashed #e6a700;border-right:3px dashed #e6a700;display:none;z-index:2;pointer-events:none;}
+  .flow-band.show{display:block;}
+  .flow-band-label{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);white-space:nowrap;background:var(--mizu-fuka);color:#fff;font-weight:900;font-size:clamp(12px,1.8vw,18px);padding:6px 12px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.4);line-height:1.1;}
+  .flow-fig figcaption{font-size:clamp(11px,1.4vw,15px);color:var(--mizu-fuka);margin-top:8px;font-weight:700;line-height:1.5;}
+
+  /* 水のたび：イラスト上を動く しずく */
+  .journey-img-wrap{margin:0 auto 10px;}
+  .journey-drop{position:absolute;top:44%;left:8%;transform:translate(-50%,-50%);width:clamp(28px,5.6vw,46px);line-height:0;z-index:4;pointer-events:none;transition:left .7s cubic-bezier(.45,.05,.3,1);filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));animation:dropBob 1.1s ease-in-out infinite;}
+  .journey-drop svg{width:100%;height:auto;display:block;}
+  .journey-drop #dropPath{transition:fill .6s ease;}
+  @keyframes dropBob{0%,100%{margin-top:0}50%{margin-top:-8px}}
+  .journey-caption{font-weight:900;color:var(--mizu-fuka);font-size:clamp(15px,2vw,22px);margin:2px 0 14px;}
+</style>
+</head>
+<body>
+  <header>
+    <div class="mon">
+      <span class="mon-maru">豊</span>
+      <div>
+        <h1>浄水場</h1>
+        <div class="sub">水が できるまで　ものしり問答</div>
+      </div>
+      <span class="mon-maru">井</span>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-mode="qa">ものしり問答</button>
+      <button class="tab" data-mode="journey">水のたび</button>
+      <button class="tab" data-mode="flow">ながれ図</button>
+      <button class="tab" data-mode="quiz">クイズ</button>
+    </nav>
+    <div class="stage">
+      <div class="person">
+        <div class="face" id="face">
+          <img class="mouth closed" src="https://raw.githubusercontent.com/byakusen/ttgheoge.jousuijou/main/jousuijou.png" alt="浄水場で働く人"
+               onerror="this.closest('.face').classList.add('no-img');">
+          <img class="mouth open" src="https://raw.githubusercontent.com/byakusen/ttgheoge.jousuijou/main/jopusuijou2.png" alt="" aria-hidden="true">
+          <span class="face-fallback">浄水場<br>の人</span>
+        </div>
+        <div class="name-tag">浄水場の人</div>
+      </div>
+      <div class="scroll">
+        <div class="answer" id="answer"></div>
+      </div>
+    </div>
+
+    <div class="panel show" id="panel-qa">
+      <div class="ask-zone">
+        <div class="label">▼ じょうすいじょうの人に きいてみよう</div>
+        <div class="input-row">
+          <input id="q" type="text" placeholder="しつもんを 入力してね（れい：フロックって なに？）" autocomplete="off">
+          <button class="btn-ask" id="askBtn">きく</button>
+        </div>
+        <div class="topics">
+          <div class="t-label">▼ こんな しつもんは どうかな？（タップしてもOK）</div>
+          <div class="chips" id="chips"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- クイズ -->
+    <div class="panel" id="panel-quiz">
+      <div class="quiz-zone">
+        <div class="quiz-status">
+          <span id="quizProg">第1問 / 全10問</span>
+          <span id="quizScore">せいかい 0こ</span>
+        </div>
+        <div class="quiz-choices" id="quizChoices"></div>
+        <button class="quiz-next hidden" id="quizNext">つぎへ ▶</button>
+      </div>
+    </div>
+
+    <!-- ながれ図（処理の流れ） -->
+    <div class="panel" id="panel-flow">
+      <div class="flow-zone">
+        <figure class="flow-fig">
+          <div class="flow-img-wrap" id="flowImgWrap">
+            <img src="data:image/jpeg;base64,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" alt="豊井浄水場の浄水処理のしくみ（断面図）">
+            <div class="flow-band" id="flowBand"><span class="flow-band-label" id="flowBandLabel"></span></div>
+          </div>
+          <figcaption>▲ 豊井浄水場の しくみ（資料：天理市 豊井浄水場パンフレット）。イラストの ①〜⑥を おすと、その 池の 場所が 光るよ。</figcaption>
+        </figure>
+        <div class="flow-track" id="flowTrack"></div>
+        <div class="water-sample">
+          <div class="glass"><div class="liquid" id="flowLiquid"></div></div>
+          <div class="sample-label" id="flowLabel">①から じゅんに タップしてね</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 水のたび -->
+    <div class="panel" id="panel-journey">
+      <div class="journey-zone">
+        <div class="journey-progress" id="journeyProg">場面 1 / 10</div>
+        <div class="flow-img-wrap journey-img-wrap" id="journeyImgWrap">
+          <img id="journeyImg" alt="豊井浄水場のしくみ（水の旅）">
+          <div class="journey-drop" id="journeyDrop"><svg viewBox="0 0 100 132" xmlns="http://www.w3.org/2000/svg"><path id="dropPath" d="M50 6 C50 6 14 56 14 84 a36 36 0 0 0 72 0 C86 56 50 6 50 6 Z" fill="#9c7b4a" stroke="#ffffff" stroke-width="6"/><ellipse cx="37" cy="86" rx="8" ry="12" fill="rgba(255,255,255,0.5)"/></svg></div>
+        </div>
+        <div class="journey-caption" id="journeyCap">天理ダム</div>
+        <div class="journey-controls">
+          <button class="journey-btn ghost" id="journeyPrev">◀ もどる</button>
+          <button class="journey-btn" id="journeyNext">つぎへ ▶</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>クラスで楽しむ 水道ものしりアプリ／答えは小学生むけにやさしくまとめています（資料：天理市 豊井浄水場パンフレット）</footer>
+
+<script>
+// ===== 浄水場で働く人の知識（小学4年生むけ・やさしい口調） =====
+// キーワードに当てはまる問いが来たら、その答えを返す。
+const KB = [
+  // ===== 地球の水・水の大切さ =====
+  { keys:["地球の水","地球にある水","水の量","13億","14億","どれくらい水","水はどのくらいある"],
+    a:"地球（ちきゅう）には、なんと13億〜14億km³（りっぽうキロメートル）もの 水が あるといわれているんだよ。すごい量（りょう）だよね。でもね、その ほとんどは そのまま 飲めない 水なんだ。だから 浄水場（じょうすいじょう）で きれいに しているんだよ。" },
+  { keys:["海水","海の水","97","ほとんど海","しょっぱい"],
+    a:"地球の 水の うち、約97パーセントは 海（うみ）の 水なんだ。海の 水は しょっぱくて、そのままでは 飲めないよね。だから わたしたちが 飲める 水は、地球ぜんたいで みると ほんのわずかしか ないんだよ。" },
+  { keys:["飲める水","飲み水の量","真水","淡水","たんすい","わずか","少ない水"],
+    a:"地球には たくさん 水が あるのに、わたしたちが 飲み水として つかえる 水は ほんのわずか。だからこそ、水は とても 大切（たいせつ）なんだ。むだに しないように 使いたいね。" },
+  { keys:["雨はどこ","雨はどうなる","降った雨","しみこむ","雨水はどこ"],
+    a:"空から ふった 雨（あめ）は、地面（じめん）に しみこんで 地下水（ちかすい）に なったり、川（かわ）に なって 流れたり するんだ。その 水が めぐりめぐって、わたしたちの 飲み水の もとに なるんだよ。" },
+  { keys:["日本は山","山が多い","川に流れ","すぐ海","流れてしまう","日本の地形"],
+    a:"日本（にほん）は 山（やま）が 多い 国なんだ。だから せっかく ふった 雨も、ほとんどが 川（かわ）に なって、すぐに 海へ 流れて いってしまう。水を のこしておくのが むずかしい 国なんだよ。" },
+  { keys:["ダムをつくる","なぜダム","ダムの役割","水をためる理由","ダムなぜ","ダムは何のため"],
+    a:"雨水（あまみず）が すぐに 海へ 流れてしまわないように、水を ためておく ために つくるのが ダムなんだ。ダムに 水を ためておけば、雨が ふらない 日が つづいても、安心して 水を 使えるんだよ。" },
+  { keys:["水は大切","水の大切さ","水がないと","生活に水","なぜ水が必要","水は欠かせ"],
+    a:"水は、飲んだり、ごはんを つくったり、おふろや トイレ、せんたく…と、わたしたちの くらしに ぜったいに 欠かせない ものなんだ。だから みんなに 安心して 使ってもらえる 水を つくるのが、わたしの しごとなんだよ。" },
+  { keys:["節水","水を大切に","水のむだ","水をへらす","エコ","むだづかい","節約"],
+    a:"水は かぎりある 大切な もの。歯（は）を みがくとき コップを つかったり、出しっぱなしに しない だけでも、たくさんの 水を 大切に できるんだ。みんなの ちょっとした 心がけが、とても 大事なんだよ。" },
+
+  // ===== 天理市の水源 =====
+  { keys:["水源","すいげん","天理市の水源","水はどこから","三つの水源","3つの水源","みなもと"],
+    a:"天理市（てんりし）には、水道水の もとに なる 水源（すいげん）が 3つ あるんだ。「奈良県営水道（けんえいすいどう）」と「天理ダム」、そして「地下水（ちかすい）」だよ。いくつも あると、安心なんだ。" },
+  { keys:["水源を分散","なぜ3つ","分散","ぶんさん","安定","いくつもある理由","一つだと"],
+    a:"もし 水源が 1つだけだと、そこで トラブルが おきたとき 水が とまって こまるよね。天理市では 水源を 3つに 分けている（分散させている）から、安定して 水道水を とどけられるんだよ。" },
+  { keys:["県営水道","けんえいすいどう","奈良県営","53","一番多い水源","用水供給"],
+    a:"天理市の 水で いちばん 多いのは、奈良県（ならけん）から わけてもらう「県営水道（けんえいすいどう）」だよ。市の 水の だいたい 53パーセント（半分より すこし 多いくらい）を しめているんだ。" },
+  { keys:["天理ダム何割","34","ダムの水どれくらい","ダムの割合"],
+    a:"天理ダムから とった 水は、天理市の 水道水の 約34パーセントを しめているんだ。このダムの 水を きれいに しているのが、わたしの はたらく 豊井浄水場（とよいじょうすいじょう）なんだよ。" },
+  { keys:["地下水","ちかすい","13","深井戸","ふかいど","井戸"],
+    a:"天理市には、市内（しない）13カ所に「深井戸（ふかいど）」という 深い 井戸（いど）が あって、そこから 地下水（ちかすい）を くみ上げているんだ。地下水は 天理市の 水の 約13パーセント。これは 杣之内浄水場（そまのうちじょうすいじょう）で きれいに しているよ。" },
+  { keys:["県営水道は","買う水","県から","受水","県の水を受け"],
+    a:"「県営水道」は、奈良県が きれいに した 水道水を、天理市が わけてもらっている（受水している）ものなんだ。だから この 水は、市の 浄水場で 処理しなくても、もう 飲める 水に なっているんだよ。" },
+  { keys:["深井戸はどこ","13カ所","井戸の数","地下水どこ"],
+    a:"天理市には、市内 13カ所に 深井戸（ふかいど）が あるんだ。地中（ちちゅう）ふかくから くみ上げた きれいな 地下水を、杣之内浄水場で 処理して、みんなの 家へ とどけているんだよ。" },
+  { keys:["杣之内","そまのうち","もう一つの浄水場","別の浄水場","二つ目の浄水場"],
+    a:"天理市には、わたしのいる 豊井浄水場の ほかに「杣之内浄水場（そまのうちじょうすいじょう）」も あるんだ。こちらでは おもに 地下水を きれいに しているよ。それぞれの 浄水場が、力を あわせて 水道水を つくっているんだ。" },
+  { keys:["ダムの水どこで","ダムの水を処理","ダムから豊井","引き込み先"],
+    a:"天理ダムに ためられた 水は、豊井浄水場へ 引きこまれて、ここで きれいな 水道水に なるんだ。ダムの 水は そのままでは 飲めないから、わたしたちが しっかり 処理（しょり）しているんだよ。" },
+  { keys:["一番多い水源","いちばん多い","多い水源どれ","主な水源","割合"],
+    a:"天理市で いちばん 多い 水源は、奈良県から わけてもらう「県営水道」で、約53パーセントだよ。つぎが 天理ダムで 約34パーセント、地下水が 約13パーセント。3つを じょうずに 組み合わせているんだ。" },
+
+  // ===== 天理ダム =====
+  { keys:["天理ダムとは","天理ダムって","ダムどこ","ダムの場所","天理ダムは"],
+    a:"天理ダムは、天理市の 東（ひがし）の ほう、山の 中に ある ダムだよ。ここに ためた 水を 使って、わたしたちの 飲み水を つくるための 水を たくわえているんだ。近くには「桃尾の滝（もものおのたき）」も あるんだよ。" },
+  { keys:["ダムは水をためる","ダムでためる","水をためておく","ダムの仕事"],
+    a:"ダムの いちばん 大事な しごとは、水を ためておくこと。雨が たくさん ふる ときに 水を ためておけば、雨が ふらない 日が つづいても 水が 足りなくなる 心配が ないんだよ。" },
+  { keys:["引き込み","ひきこみ","ダムから水を運","導水","どうすい","609","1980","水の通り道"],
+    a:"天理ダムの 水は、「導水路（どうすいろ）」や「導水管（どうすいかん）」という 水の 通り道を 通って、豊井浄水場まで 運ばれてくるんだ。豊井浄水場では、導水路が 609m、導水管が 1,980mも あるんだよ。" },
+
+  // ===== 豊井浄水場の基本 =====
+  { keys:["豊井浄水場","とよいじょうすいじょう","とよい","ここは何","この浄水場","豊井"],
+    a:"わたしが はたらいているのが「豊井浄水場（とよいじょうすいじょう）」だよ。天理ダムから とった 水を きれいに して、安全（あんぜん）で 安心（あんしん）な 水道水を、天理市の みんなに とどけている ところなんだ。" },
+  { keys:["浄水場の場所","どこにある","豊井町","住所","場所はどこ"],
+    a:"豊井浄水場は、天理市の 豊井町（とよいちょう）に あるんだ。天理ダムの 近くで、山に かこまれた しずかな 場所だよ。きれいな 水を つくるのに ぴったりの 場所なんだ。" },
+  { keys:["浄水場は何をする","浄水場とは","何をするところ","浄水場の役割","じょうすいじょうって"],
+    a:"浄水場（じょうすいじょう）は、川や ダムの 水（原水＝げんすい）を きれいに して、そのまま 飲める 水道水に かえる ところなんだ。よごれを とったり、ばいきんを やっつけたり…たくさんの しごとを しているんだよ。" },
+  { keys:["どれくらいつくれる","施設能力","14400","一日にどれくらい","1日に","量はどれくらい","つくれる量"],
+    a:"豊井浄水場では、1日に なんと 14,400m³（りっぽうメートル）もの 水道水を つくることが できるんだ。これは 25mプール で いうと、だいたい 40ぱい分くらい。すごい量（りょう）でしょ！" },
+  { keys:["豊井の水源","豊井浄水場の水源","ここの水はどこから","豊井の水"],
+    a:"豊井浄水場の 水源は「天理ダム」だよ。天理ダムに ためられた 水を 引きこんで、ここで きれいな 水道水に しているんだ。" },
+  { keys:["処理方法","しょりほうほう","どうやってきれい","凝集沈澱","急速ろ過","きれいにする方法"],
+    a:"豊井浄水場では、「薬品凝集沈澱（やくひんぎょうしゅうちんでん）」と「急速ろ過（きゅうそくろか）」という やり方で 水を きれいに しているんだ。むずかしい 名前だけど、薬で よごれを 固めて 沈めて、砂で こす、という 方法だよ。" },
+  { keys:["薬","くすり","使う薬","薬品","やくひん","何の薬","入れるもの"],
+    a:"豊井浄水場で 使う 薬（くすり）は おもに 2つ。よごれを 固めるための「PAC（ポリ塩化アルミニウム）」という 凝集剤（ぎょうしゅうざい）と、ばいきんを やっつけるための「次亜塩素酸ナトリウム（じあえんそさんナトリウム）」という 消毒剤（しょうどくざい）だよ。" },
+  { keys:["管理棟","かんりとう","建物","たてもの","ビル"],
+    a:"豊井浄水場には「管理棟（かんりとう）」という 建物が あって、鉄筋（てっきん）コンクリートで できた、地下1階・地上2階の たてものなんだ。その 2階に、大事な 中央管理センターが あるんだよ。" },
+  { keys:["安全安心","あんぜんあんしん","モットー","あいことば","届けたい","キャッチ"],
+    a:"豊井浄水場の あいことばは「安全（あんぜん）・安心（あんしん）な 水道水を お届けします」だよ。みんなが 毎日 安心して 飲める 水を つくる――それが わたしたちの いちばん 大切な しごとなんだ。" },
+  { keys:["電話番号","でんわ","連絡","れんらく","問い合わせ"],
+    a:"豊井浄水場の 電話番号は 0743-62-0496 だよ。水道の ことで こまったときは、天理市上下水道局（0743-63-1001）に きいてみると いいんだ。" },
+
+  // ===== 浄水処理の流れ =====
+  { keys:["浄水処理","じょうすいしょり","きれいにすること","処理とは","浄水とは"],
+    a:"「浄水処理（じょうすいしょり）」というのは、よごれた 水を きれいに して、飲める 水道水に する 作業の ことだよ。いくつもの 池（いけ）を 順番（じゅんばん）に 通しながら、すこしずつ きれいに していくんだ。" },
+  { keys:["処理の流れ","ながれ","順番","じゅんばん","どんな順番","流れを教えて","ステップ"],
+    a:"水道水が できるまでの 順番は、①着水井（ちゃくすいせい）→②薬品混和池（やくひんこんわち）→③フロック形成池→④沈でん池→⑤ろ過池→⑥配水池、だよ。この 順番で 池を 通るうちに、水は どんどん きれいに なっていくんだ。" },
+  { keys:["着水井","ちゃくすいせい","ちゃくすい","最初の池","一番目","さいしょの池"],
+    a:"「着水井（ちゃくすいせい）」は、天理ダムの 水（原水）が いちばん さいしょに 入ってくる 場所だよ。ここで、水の よごれ（にごり）を とるための 薬「PAC」を 入れるんだ。浄水処理の スタート地点なんだよ。" },
+  { keys:["着水井で何","最初に薬","最初にPAC","にごりをとる薬"],
+    a:"着水井では、運ばれてきた 原水に「PAC（ポリ塩化アルミニウム）」という 凝集剤（ぎょうしゅうざい）を 入れるんだ。この 薬が、水の 中の 小さな よごれを くっつけて 固める はたらきを してくれるんだよ。" },
+  { keys:["原水","げんすい","もとの水","ダムの水そのまま","処理する前の水"],
+    a:"「原水（げんすい）」というのは、まだ きれいに する 前の、ダムから とってきた ままの 水の ことだよ。にごっていたり、目に 見えない よごれが 入っていたりするから、これから 浄水場で きれいに していくんだ。" },
+  { keys:["薬品混和池","やくひんこんわち","こんわち","混ぜる池","2番目","薬を混ぜ"],
+    a:"「薬品混和池（やくひんこんわち）」は、入れた 薬（PAC）と 原水を よ〜く 混ぜ合わせる 池だよ。ここで さらに、ばいきんを やっつける 消毒剤（しょうどくざい）も 入れるんだ。" },
+  { keys:["消毒剤を入れる","しょうどくを入れ","ばいきんをやっつける薬を","次亜塩素を入れる"],
+    a:"薬品混和池では、消毒剤（しょうどくざい）の「次亜塩素酸ナトリウム」も 入れるんだ。これは、水の 中の 目に 見えない ばいきんを やっつけて、安全な 水に するための 大切な 薬なんだよ。" },
+  { keys:["PAC","ぱっく","ポリ塩化アルミニウム","凝集剤の名前"],
+    a:"「PAC（パック）」は、ポリ塩化アルミニウム という 薬の 名前だよ。水の 中の 細かい よごれを くっつけて、大きな かたまりに する はたらきが あるんだ。これが あるから よごれが 沈めやすく なるんだよ。" },
+  { keys:["凝集剤","ぎょうしゅうざい","よごれを固める","くっつける薬","固める薬"],
+    a:"凝集剤（ぎょうしゅうざい）というのは、水の 中に ちらばっている 小さな よごれを くっつけて、大きな かたまりに する 薬の ことだよ。小さいままだと 沈まないけど、大きく すれば 池の そこに しずんで くれるんだ。" },
+  { keys:["フロック形成池","けいせいち","3番目","かたまりをつくる池"],
+    a:"「フロック形成池（けいせいち）」は、薬の はたらきで、水の 中の よごれを「フロック」という 大きな かたまりに する 池だよ。ゆっくり 水を かきまぜて、よごれを どんどん くっつけていくんだ。" },
+  { keys:["フロック","ふろっく","かたまり","よごれのかたまり","フロックって"],
+    a:"「フロック」というのは、水の 中の 小さな よごれが、薬の はたらきで くっついて できた かたまりの ことだよ。小さな よごれが あつまって 大きく なるから、池の そこに 沈めやすく なるんだ。" },
+  { keys:["沈でん池","沈澱池","ちんでんち","しずめる池","4番目","沈める池"],
+    a:"「沈でん池（ちんでんち）」は、できた フロック（よごれの かたまり）を、池の そこに しずめて 取りのぞく 池だよ。よごれが 下に しずむと、上の ほうの きれいな 水（上澄み＝うわずみ）だけが のこるんだ。" },
+  { keys:["フロックを沈める","底に沈める","しずめてとる","沈むと"],
+    a:"沈でん池では、大きく なった フロックが、ゆっくり 池の そこへ しずんでいくんだ。よごれが しずんで くれるから、上の ほうの 水は とても きれいに なるんだよ。" },
+  { keys:["上澄み","うわずみ","上のきれいな水","次の池へ"],
+    a:"沈でん池で よごれが そこに しずむと、上の ほうに きれいな 水（上澄み＝うわずみ）が のこるんだ。この きれいな 上澄みを、つぎの「ろ過池」へ 送って、もっと きれいに していくんだよ。" },
+  { keys:["ろ過池","ろかち","ろか","ろ過","5番目","こす池","ろ過とは"],
+    a:"「ろ過池（ろかち）」は、砂（すな）の 層（そう）を 通すことで、目に 見えない ほどの 小さな よごれまで 取りのぞく 池だよ。ここを 通ると、水は ぐっと きれいに なるんだ。" },
+  { keys:["砂でこす","すなでこす","砂の層","砂の役割","フィルター","すなの"],
+    a:"ろ過池では、つみ重なった 砂（すな）の 層を、水が ゆっくり 通りぬけていくんだ。すると 砂の つぶの すきまで、小さな よごれが ひっかかって とれる。まるで 自然の フィルターみたいだろう？" },
+  { keys:["目に見えない","小さな汚れ","見えないよごれ","細かいよごれ"],
+    a:"沈でん池で 大きな よごれは とれるけど、まだ 目に 見えない ほど 小さな よごれが のこっているんだ。それを 取りのぞくのが「ろ過池」の しごと。砂を 通して、最後の しあげを するんだよ。" },
+  { keys:["配水池","はいすいち","ためる池","6番目","水道水をためる池"],
+    a:"「配水池（はいすいち）」は、できあがった 水道水を いったん ためておく 池だよ。ここから みんなの 家へ 配水（はいすい）されるんだ。豊井浄水場では、この 配水池は 地下（ちか）に つくられているんだよ。" },
+  { keys:["配水池は地下","地下にある池","ちかにある","地下の池"],
+    a:"豊井浄水場の 配水池は、地下（ちか）に つくられているのが とくちょうなんだ。できあがった 大切な 水道水を、地下で きちんと ためておいて、みんなの 家へ とどける じゅんびを しているんだよ。" },
+  { keys:["排泥池","はいでいち","汚泥","おでい","どろ","のこったどろ","7番目"],
+    a:"「排泥池（はいでいち）」は、沈でん池で そこに しずめた よごれ（汚泥＝おでい、フロック）を、いったん ためておく 池だよ。きれいな 水を つくる 反対（はんたい）で、出てきた よごれを あつめる 場所なんだ。" },
+  { keys:["汚泥はどこへ","どろはどうなる","のこったよごれ","汚れのゆくえ"],
+    a:"沈でん池の そこに しずんだ よごれ（汚泥＝おでい）は、排泥池に あつめられるんだ。そして ポンプで 杣之内浄水場（そまのうちじょうすいじょう）へ 送られて、そこで しっかり 処理されるんだよ。" },
+  { keys:["杣之内へ送る","汚泥を送る","汚泥の処理","どろを処理"],
+    a:"豊井浄水場で 出た 汚泥（おでい）は、ポンプで 杣之内浄水場へ 送って 処理するんだ。きれいな 水を つくる だけでなく、出てきた よごれの しまつまで きちんと しているんだよ。" },
+  { keys:["次亜塩素酸ナトリウム","じあえんそ","消毒剤","しょうどくざい","えんそ","塩素とは"],
+    a:"ばいきんを やっつけるために 使う 薬が、消毒剤（しょうどくざい）の「次亜塩素酸ナトリウム」だよ。これを 入れることで、水の 中の 目に 見えない ばいきんが いなくなって、安心して 飲める 水に なるんだ。" },
+  { keys:["なぜ消毒","どうして消毒","ばい菌","病気","消毒する理由","菌をやっつけ"],
+    a:"水の 中には、目に 見えない ばいきんが いることが あるんだ。そのまま 飲むと 病気（びょうき）に なることも。だから 消毒剤で ばいきんを やっつけて、みんなが 安心して 飲める 水に しているんだよ。" },
+  { keys:["前塩素","後塩素","ぜんえんそ","こうえんそ","塩素を2回","二回","2回入れ"],
+    a:"豊井浄水場では、消毒の ための 塩素を、処理の 前（前塩素）と 後（後塩素）の 2回に 分けて 入れているんだ。さいしょと さいごに しっかり 消毒することで、いつも 安全な 水を とどけられるんだよ。" },
+  { keys:["プールのにおい","塩素のにおい","水のにおい","カルキ","においがする"],
+    a:"水道水から たまに プールみたいな においが することが あるよね。あれは、ばいきんを やっつけるための 塩素（えんそ）の においなんだ。安全の しるしでも あるけど、気になる ときは すこし 置いておくと においが やわらぐよ。" },
+  { keys:["順番を覚え","おぼえ方","覚えるには","流れを覚え","覚えやすく"],
+    a:"むずかしい 名前が ならぶけど、「水が 入る→薬を 入れる→混ぜる→かたまりにする→沈める→こす→ためる」と おぼえると わかりやすいよ。一つずつ 池を 通るたびに、水が きれいに なっていくんだ。" },
+  { keys:["1系","2系","いっけい","にけい","系統","二つのライン","2つの系"],
+    a:"豊井浄水場には、水を きれいに する 道（ライン）が「1系（いっけい）」と「2系（にけい）」の 2つ あるんだ。2つに 分かれていると、たくさんの 水を 処理できたり、片方を 点検（てんけん）できたりして べんりなんだよ。" },
+  { keys:["薬は安全","薬大丈夫","薬を入れて平気","体に悪くない","害はない","薬は体に"],
+    a:"「薬を 入れて 大丈夫？」って 心配に なるよね。でも 安心して。入れる 量（りょう）は きちんと はかって 決めていて、人の 体に わるい えいきょうが 出ないように、きびしく 管理しているんだ。だから 安全なんだよ。" },
+
+  // ===== 中央管理センター・管理 =====
+  { keys:["中央管理センター","ちゅうおうかんり","管理センター","コンピューター","監視"],
+    a:"「中央管理センター」は、浄水場の しごとを まとめて 見はったり、調整したりする へやだよ。水を きれいに する ようすや、水質（すいしつ）、市内へ 送る 水まで、ぜんぶ ここで 一括（いっかつ）して 管理しているんだ。" },
+  { keys:["管理センターどこ","センターの場所","2階にある"],
+    a:"中央管理センターは、豊井浄水場の 管理棟（かんりとう）の 2階に あるんだ。たくさんの 画面（がめん）を 見ながら、水道水が きちんと できているか、いつも 見まもっているんだよ。" },
+  { keys:["何を管理","管理する内容","管理の仕事","水質を見る"],
+    a:"中央管理センターでは、水を きれいに する 工程（こうてい）や、市内へ 水を 送る ようす、そして 水質（すいしつ＝水の きれいさ）まで、いろいろな ことを まとめて 見はっているんだ。みんなの 安全を まもる 司令室（しれいしつ）みたいな 場所だよ。" },
+  { keys:["平成8年","いつできた","センターいつ","設置"],
+    a:"中央管理センターは、平成8年（1996年）に つくられたんだ。コンピューターを 使って、浄水場の しごとを より 正確（せいかく）に、安全に 管理できるように なったんだよ。" },
+  { keys:["24時間","ずっと","夜も","休みなし","いつも見て","夜中","交代"],
+    a:"水道水は、夜（よる）も 昼（ひる）も、休まず みんなの 家へ とどけないと いけないよね。だから 浄水場では、機械（きかい）や 人が 交代（こうたい）しながら、いつも 水の ようすを 見まもっているんだよ。" },
+
+  // ===== 配水・市内へ届くまで =====
+  { keys:["配水","はいすい","配るとは","水を配る","届ける仕組み"],
+    a:"「配水（はいすい）」というのは、できあがった 水道水を、みんなの 家や 学校へ 配（くば）ること。配水池に ためた 水を、水道管（すいどうかん）を 通して 送りとどけるんだよ。" },
+  { keys:["配水池の役割","なぜためる","ためておく理由","配水池は何のため"],
+    a:"配水池は、できあがった 水道水を いったん ためておく 場所だよ。みんなが たくさん 水を 使う 時間でも 足りなく ならないように、前もって たっぷり ためておく 大切な やくわりが あるんだ。" },
+  { keys:["ポンプ場","ぽんぷ","ポンプ","圧力をかける","送水ポンプ","加圧"],
+    a:"「ポンプ場」は、水道水に 力（圧力＝あつりょく）を かけて、高い 場所まで 水を 送る 施設（しせつ）だよ。水は そのままだと 高い ところへ 流れていかないから、ポンプで ぐっと おし上げるんだ。" },
+  { keys:["高い場所","山の上","坂の上","高いところに水","どうやって上へ","高台"],
+    a:"山の 上や 坂の 上の 家にも 水を とどけるには、水を 高い ところへ おし上げないと いけないよね。そのために、ポンプ場で 水に 力を かけて、高い 場所の 配水池まで 送っているんだよ。" },
+  { keys:["受水池","じゅすいち","県から受ける池","受け取る池","県水を"],
+    a:"「受水池（じゅすいち）」は、奈良県から わけてもらった（買った）水道水を、いったん ためておく 場所だよ。県営水道の 水は、ここに ためてから みんなの 家へ 配水されるんだ。" },
+  { keys:["水道管","すいどうかん","パイプ","管を通って","地面の下","くだ"],
+    a:"浄水場で できた 水道水は、地面（じめん）の 下に うまっている「水道管（すいどうかん）」という パイプを 通って、みんなの 家まで とどくんだ。じゃ口（ぐち）を ひねると 水が 出るのは、この 管が つながっているからだよ。" },
+  { keys:["標高","ひょうこう","高さの差","坂が多い","高低差"],
+    a:"天理市は、低い ところと 高い ところで、土地の 高さ（標高＝ひょうこう）に 大きな ちがいが あるんだ。だから、ポンプ場で 水を 高い ところへ 送ったり、配水池を あちこちに つくったりして、みんなに 水が とどくように くふうしているんだよ。" },
+  { keys:["配水池はいくつ","たくさんの配水池","別所","東部配水池","いろんな池","配水池の名前"],
+    a:"天理市には、別所（べっしょ）・東部（とうぶ）・藤井（ふじい）・山田・長滝（ながたき）…と、たくさんの 配水池が あるんだ。地いきごとに 配水池を おくことで、市内の すみずみまで 水を とどけているんだよ。" },
+  { keys:["杣之内は何","杣之内の役割","もう一つの役割","杣之内の仕事"],
+    a:"杣之内浄水場は、おもに 地下水を きれいに している 浄水場だよ。それに、豊井浄水場で 出た 汚泥（おでい）を 受け取って 処理する しごとも しているんだ。2つの 浄水場が 助け合っているんだよ。" },
+  { keys:["上下水道局","水道局","じょうげすいどう","役所","だれが管理","管理しているのは"],
+    a:"天理市の 水道を まとめて 管理しているのが「天理市上下水道局（じょうげすいどうきょく）」だよ。きれいな 水を とどける「上水道」と、使った 水を きれいに する「下水道（げすいどう）」、その 両方（りょうほう）を 受けもっているんだ。" },
+
+  // ===== 水質・安全 =====
+  { keys:["水質検査","すいしつ","検査","けんさ","水をしらべる","チェック"],
+    a:"できた 水道水が ほんとうに 安全か どうか、いつも「水質検査（すいしつけんさ）」で しらべているんだ。きまった 基準（きじゅん）を きちんと 守れているか たしかめてから、みんなに とどけているんだよ。" },
+  { keys:["安全な水","あんぜんな水","良い水とは","きれいな水とは"],
+    a:"「安全な 水」というのは、よごれや ばいきんが なくて、安心して 飲める 水の ことだよ。浄水場では、薬や 砂、検査（けんさ）など、いくつもの しくみで、その 安全を しっかり まもっているんだ。" },
+  { keys:["なぜ飲める","そのまま飲める","蛇口の水飲める","飲んで大丈夫","飲める水道水"],
+    a:"日本の 水道水は、じゃ口から そのまま 飲めるんだ。これは すごい ことなんだよ。浄水場で よごれを とって、ばいきんを やっつけて、何度も 検査しているから、安心して 飲めるんだ。" },
+  { keys:["にごり","濁り","にごった水","透明にする","すきとおる","とうめい"],
+    a:"にごった 水を すきとおった 水に する いちばんの コツは、にごりの もとを 薬で 固めて（フロックにして）、沈めて とること。そのあと 砂で こせば、すきとおった きれいな 水に なるんだよ。" },
+  { keys:["ばい菌を取る","ばいきんをなくす","菌をなくす","清潔にする"],
+    a:"水の 中の 目に 見えない ばいきんは、消毒剤（次亜塩素酸ナトリウム）を 入れて やっつけるんだ。これで 病気の もとを なくして、安心して 飲める 水に しているんだよ。" },
+  { keys:["そのまま飲める国","日本の水道はすごい","世界の水","めずらしい"],
+    a:"じつは、じゃ口の 水を そのまま 飲める 国は、世界でも あまり 多くないんだ。日本は その 数少ない 国の 一つ。浄水場の しごとや、検査の おかげなんだよ。ありがたいことだね。" },
+  { keys:["なぜきれいになる","どうしてきれい","きれいになる仕組み","きれいになるしくみ"],
+    a:"水が きれいに なるのは、「薬で よごれを 固める→沈める→砂で こす→消毒する」という いくつもの ステップを 通るからなんだ。一つずつ ていねいに 通すから、すきとおった 安全な 水に なるんだよ。" },
+  { keys:["水はどこからくる","水のたび","水の旅","家まで","蛇口まで","水のながれ全体"],
+    a:"じゃ口から 出る 水は、ダム→浄水場→配水池→水道管…と、長い 旅を して みんなの 家に とどいているんだ。何人もの 人と、たくさんの 機械が はたらいて、やっと 1ぱいの 水が 出ているんだよ。" },
+
+  // ===== くらしと水・まとめ =====
+  { keys:["1日に使う水","どれくらい使う","水の使用量","使う量"],
+    a:"わたしたちは、飲んだり あらったり トイレに 使ったりで、1人 1日に たくさんの 水を 使っているんだ。だから 浄水場では、毎日 たくさんの 水道水を つくって、みんなが こまらないように しているんだよ。" },
+  { keys:["水の使い道","何に使う","水道水の使い方","どんなときに使う"],
+    a:"水道水は、飲むのは もちろん、ごはんづくり、おふろ、トイレ、せんたく、そうじ…と、いろんな ことに 使われているんだ。みんなの 生活の あちこちで、水は 大かつやくしているんだよ。" },
+  { keys:["節水の工夫","水を節約","むだにしない方法","節約のしかた","節水方法"],
+    a:"水を 大切に 使う くふうは いろいろ あるよ。歯みがきの ときは コップを 使う、シャワーは こまめに 止める、おふろの のこり湯を せんたくに 使う…。小さな くふうが、大きな 節約に なるんだ。" },
+  { keys:["水を汚さない","よごさない","川を汚さない","油を流さない","環境を守"],
+    a:"使った あとの 水も、川や 海に つながっているんだ。だから、あぶらを そのまま 流さない、ゴミを 捨てない、ということが 大事。きれいな 水を 守るのは、みんな 一人ひとりの 心がけなんだよ。" },
+  { keys:["下水道","げすいどう","使った水","汚れた水","トイレの水","流した水のゆくえ"],
+    a:"使って よごれた 水は「下水道（げすいどう）」を 通って 集められ、きれいに してから 川へ もどされるんだ。きれいな 水を とどける「上水道」と、よごれた 水を きれいに する「下水道」――両方 そろって、わたしたちの くらしを 守っているんだよ。" },
+  { keys:["マスコット","キャラクター","水のキャラ","水滴のキャラ","ゆるキャラ","WとS"],
+    a:"天理市の 水道には、かわいい マスコットの なかまが いるんだ。水（みず）を あらわす 青い 男の子「W」と、ピンクの 女の子「S」。みんなに 水道の ことを 知ってもらう、たよりに なる なかまだよ。" },
+  { keys:["水の循環","じゅんかん","水はめぐる","ぐるぐる","水循環","めぐる"],
+    a:"水は、海から 蒸発（じょうはつ）して 雲に なり、雨に なって 地上に ふり、川や 地下水に なって また 海へ…と、ぐるぐる めぐっているんだ。これを「水の 循環（じゅんかん）」というよ。地球の 大きな 水の 旅なんだ。" },
+  { keys:["蛇口","じゃぐち","ひねると水","なぜ水が出る","水が出る仕組み"],
+    a:"じゃ口を ひねると 水が 出るのは、配水池や ポンプの 力で、水道管の 中に いつも 水が 流れる じゅんびが できているからなんだ。あたりまえに 思えるけど、たくさんの しくみの おかげなんだよ。" },
+  { keys:["仕事","しごと","浄水場で働く","どんな仕事","あなたの仕事","お仕事"],
+    a:"わたしの しごとは、水を きれいに する 機械を 動かしたり、水質を しらべたり、薬の 量を 調整したり…と、いろいろ あるんだ。みんなが いつでも 安心して 水を 飲めるように、ずっと 水を 見まもっているんだよ。" },
+  { keys:["見学","けんがく","行ってみたい","見られる","行きたい","遊びに行ける"],
+    a:"浄水場の 見学（けんがく）に ついては、天理市上下水道局に きいてみると いいよ。じっさいに 池や 機械を 見ると、水が きれいに なる ようすが よく わかって、きっと びっくりするはずだよ！" },
+  { keys:["水道料金","料金","お金","水のねだん","ただ","水道代"],
+    a:"水道水は ただ（無料）じゃなくて、使った 分だけ 料金が かかるんだ。これは、浄水場や 水道管を 動かしたり 直したりする お金に なるんだよ。だから 水を 大切に 使うことは、お金を 大切に することにも つながるんだ。" },
+  { keys:["浄水場がないと","なかったら","もしなかったら","ないとどうなる"],
+    a:"もし 浄水場が なかったら、ダムや 川の 水を そのまま 飲むことに なって、病気に なる かもしれない。安心して 飲める 水が あるのは、浄水場が ちゃんと はたらいている おかげなんだよ。" },
+  { keys:["大切にするには","どうすれば","わたしにできること","できること","ぼくにできる"],
+    a:"水を 大切に するには、出しっぱなしに しない、よごさない、そして 水が どうやって つくられているか 知ること。きみが きょう 水に きょうみを もってくれたこと、それも とても 大切な 一歩なんだよ。" },
+  { keys:["川を守る","海を守る","自然を守る","かんきょう","しぜんを"],
+    a:"きれいな 水道水は、もとを たどれば 川や ダムの 水。その 川や 海が きれいで ないと、いい 水は つくれないんだ。だから、自然（しぜん）を 守ることは、みんなの 飲み水を 守ることでも あるんだよ。" },
+  { keys:["雨水と水道水","雨は飲める","あまみず","雨をそのまま","雨水のちがい"],
+    a:"雨水（あまみず）は きれいに 見えても、ほこりや ばいきんが まじっていることが あるから、そのままでは 飲まない ほうが いいんだ。浄水場で きちんと 処理した 水道水だからこそ、安心して 飲めるんだよ。" },
+  { keys:["なぜきれいにする","どうしてきれいに","きれいにする理由","処理する理由","なぜ処理"],
+    a:"ダムや 川の 水には、にごりや ばいきんが まじっていることが あるんだ。そのまま 飲むと 病気に なる ことも。だから 浄水場で きれいに 処理して、だれもが 安心して 飲める 水に しているんだよ。" },
+  { keys:["導水路","どうすいろ","水路の長さ","609"],
+    a:"天理ダムの 水を 浄水場へ はこぶ 道の うち、「導水路（どうすいろ）」は 609mの 長さが あるんだ。長い 通り道を 通って、ダムの 水が 浄水場まで やってくるんだよ。" },
+  { keys:["桃尾の滝","もものお","滝","たき"],
+    a:"豊井浄水場や 天理ダムの 近くには「桃尾の滝（もものおのたき）」という きれいな 滝が あるんだ。このあたりは 水が ゆたかで、自然の 多い 場所なんだよ。" },
+  { keys:["山の辺の道","やまのべ","古い道"],
+    a:"豊井浄水場の あたりには「山の辺の道（やまのべのみち）」という、とても 古い 道も 通っているんだ。むかしの 人も この あたりの 水と ともに くらしてきたんだね。" },
+  { keys:["何回池を通る","池はいくつ","池の数","6つの池"],
+    a:"水道水が できるまでに 通る おもな 池は、着水井・薬品混和池・フロック形成池・沈でん池・ろ過池・配水池の 6つ。それぞれの 池に、ちゃんと やくわりが あるんだよ。" },
+  { keys:["プールでいうと","どれくらいの量","たとえると","量をたとえ"],
+    a:"豊井浄水場が 1日に つくれる 水道水は 14,400m³。25mプールに たとえると、だいたい 40ぱい分くらいの 量なんだ。毎日 それだけの 水を つくって、みんなに とどけているんだよ。" },
+
+  // ===== あいさつ・まとめ =====
+  { keys:["ありがとう","まとめ","勉強になった","わかった","さいごに","おしまい","おわり"],
+    a:"いっぱい きいてくれて ありがとう！ 毎日 あたりまえに 出てくる 水道水は、ダムの 水を、たくさんの 池と 人の 手で きれいに した、大切な 1ぱいなんだ。これからも 水を 大事に 使ってね。応援（おうえん）しているよ！" },
+  { keys:["こんにちは","はじめまして","やあ","だれ","あなたは誰","名前"],
+    a:"こんにちは！ わたしは 豊井浄水場（とよいじょうすいじょう）で はたらいている 人だよ。みんなが まいにち つかう 水道水（すいどうすい）が どうやって つくられるか、なんでも きいてね！" }
+];
+
+// 入力にいちばん合う答えをさがす
+function findAnswer(text){
+  const t = (text||"").replace(/\s/g,"");
+  if(!t) return null;
+  let best=null, bestScore=0;
+  for(const item of KB){
+    let score=0;
+    for(const k of item.keys){ if(t.includes(k)) score += k.length; }
+    if(score>bestScore){bestScore=score; best=item;}
+  }
+  return bestScore>0 ? best.a : null;
+}
+
+const NOT_FOUND = [
+  "うーん、それは わたしにも うまく こたえられない しつもんだなぁ。ことばを かえて、もういちど きいてみてね。たとえば『フロックって なに？』『ろ過池』『天理ダム』なんかは どうかな？",
+  "むむ、それについては こたえを 持っていないんだ。べつの 言い方で、もういちど たずねてみてね。",
+  "はてな、聞きおぼえの ない しつもんだなぁ。『浄水処理の 流れ』や『配水池』の ことなら、いくらでも 話してあげられるよ！"
+];
+
+const GREET = "こんにちは！ わたしは 豊井浄水場（とよいじょうすいじょう）で はたらいている 人だよ。みんなが まいにち つかう 水道水（すいどうすい）が、どうやって つくられているか、なんでも きいてね。下の ますに しつもんを 入力して、リターンを おすか「きく」ボタンを おしてみよう！";
+
+// ===== タイプライター表示 =====
+const answerEl = document.getElementById('answer');
+const faceEl = document.getElementById('face');
+let typing=null;
+let mouthTimer=null;
+function startMouth(){
+  stopMouth();
+  // 口を開いた絵と閉じた絵をすばやく切り替えて「ぱくぱく」させる
+  mouthTimer=setInterval(()=>{ faceEl.classList.toggle('talking-open'); },130);
+}
+function stopMouth(){
+  if(mouthTimer){ clearInterval(mouthTimer); mouthTimer=null; }
+  faceEl.classList.remove('talking-open'); // 話し終わりは口を閉じた絵にもどす
+}
+function speak(text, mood){
+  faceEl.classList.remove('seikai'); void faceEl.offsetWidth;
+  if(mood) faceEl.classList.add(mood);
+  startMouth();
+  if(typing) clearInterval(typing);
+  answerEl.innerHTML="";
+  let i=0;
+  typing=setInterval(()=>{
+    if(i>=text.length){clearInterval(typing); stopMouth(); return;}
+    answerEl.appendChild(document.createTextNode(text[i]));
+    i++;
+  },32);
+}
+
+function handleAsk(text){
+  const a = findAnswer(text);
+  if(a){ speak(a,'seikai'); }
+  else{ speak(NOT_FOUND[Math.floor(Math.random()*NOT_FOUND.length)]); }
+}
+
+// ===== おすすめ問いチップ =====
+const SUGGESTIONS = [
+  "水はどこからくるの？","フロックって なに？","ろ過池の しごとは？",
+  "天理市の 水源は？","なぜ消毒するの？","配水池って なに？",
+  "薬を 入れて 大丈夫？","1日に どれくらい つくれる？"
+];
+const chipsEl=document.getElementById('chips');
+SUGGESTIONS.forEach(s=>{
+  const b=document.createElement('button');
+  b.className='chip'; b.type='button'; b.textContent=s;
+  b.onclick=()=>{ qEl.value=s; handleAsk(s); };
+  chipsEl.appendChild(b);
+});
+
+// ===== 入力イベント =====
+const qEl=document.getElementById('q');
+
+// IME（日本語入力）の変換確定中かどうかを記録する
+let composing=false;
+qEl.addEventListener('compositionstart',()=>{ composing=true; });
+qEl.addEventListener('compositionend',()=>{ composing=false; });
+
+document.getElementById('askBtn').onclick=()=>handleAsk(qEl.value);
+qEl.addEventListener('keydown',e=>{
+  // 漢字変換などの確定リターンでは送信しない。
+  // 変換が確定し、ふつうにリターンを押したときだけ質問を送る。
+  if(e.key==='Enter' && !composing && !e.isComposing){
+    handleAsk(qEl.value);
+  }
+});
+
+// ===== モード切りかえ（タブ） =====
+const panels={qa:'panel-qa',quiz:'panel-quiz',flow:'panel-flow',journey:'panel-journey'};
+const FLOW_INTRO="これは 豊井浄水場の「ながれの 図」だよ。天理ダムの 水は、左から 右へ すすむうちに、だんだん きれいに なっていくんだ。下の ①〜⑥の ボタンを じゅんに おすと、その 池の せつめいと、コップの 水の ようすが 見られるよ！";
+function setMode(m){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===m));
+  Object.values(panels).forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById(panels[m]).classList.add('show');
+  if(m==='quiz') startQuiz();
+  else if(m==='flow'){ buildFlow(); speak(FLOW_INTRO); }
+  else if(m==='journey'){ jIdx=0; renderJourney(); }
+  else speak(GREET);
+}
+document.querySelectorAll('.tab').forEach(t=>{ t.onclick=()=>setMode(t.dataset.mode); });
+
+// ===== クイズ =====
+const QUIZ=[
+  {q:"よごれが くっついて できた 大きな かたまりを 何という？", c:["フロック","プランクトン","シャボン"], a:0, ex:"小さな よごれが くっついて 大きく なった かたまりだよ。"},
+  {q:"水の よごれを 固める ために 入れる 薬「PAC」の はたらきは？", c:["色を つける","よごれを くっつける","あまくする"], a:1, ex:"よごれを くっつけて 固める 凝集剤（ぎょうしゅうざい）なんだ。"},
+  {q:"ばいきんを やっつける ために 入れる 薬は？", c:["さとう","次亜塩素酸ナトリウム","しお"], a:1, ex:"水の 中の ばいきんを やっつける 消毒剤だよ。"},
+  {q:"フロックを 池の そこに しずめて とる 池は？", c:["ろ過池","沈でん池","配水池"], a:1, ex:"フロックが しずんで、上の 水が きれいに なるんだ。"},
+  {q:"ろ過池では 何を 使って 小さな よごれを とる？", c:["すな","あみ","じしゃく"], a:0, ex:"砂の つぶの すきまで、小さな よごれが とれるんだよ。"},
+  {q:"できあがった 水道水を いったん ためておく 池は？", c:["着水井","配水池","排泥池"], a:1, ex:"ここに ためてから、みんなの 家へ 配水されるんだ。"},
+  {q:"豊井浄水場の 水源（水の もと）は どこ？", c:["天理ダム","海","プール"], a:0, ex:"豊井浄水場は 天理ダムの 水を きれいに しているよ。"},
+  {q:"天理市の 水源は いくつ ある？", c:["1つ","3つ","10こ"], a:1, ex:"県営水道・天理ダム・地下水の 3つだよ。"},
+  {q:"高い 場所の 家まで 水を おし上げる 施設は？", c:["ポンプ場","ダム","学校"], a:0, ex:"水に 力を かけて、高い ところへ おし上げるんだ。"},
+  {q:"水道水が できるまで、いちばん さいしょに 水が 入る 場所は？", c:["着水井","ろ過池","配水池"], a:0, ex:"原水（ダムの 水）が さいしょに 入ってくる 場所だよ。"}
+];
+let quizOrder=[], qPos=0, qScore=0;
+const elProg=document.getElementById('quizProg'), elScore=document.getElementById('quizScore'),
+      elChoices=document.getElementById('quizChoices'), elNext=document.getElementById('quizNext');
+function startQuiz(){
+  quizOrder=[...Array(QUIZ.length).keys()].sort(()=>Math.random()-0.5);
+  qPos=0; qScore=0;
+  showQuestion();
+}
+function showQuestion(){
+  elNext.classList.add('hidden');
+  const item=QUIZ[quizOrder[qPos]];
+  elProg.textContent=`第${qPos+1}問 / 全${QUIZ.length}問`;
+  elScore.textContent=`せいかい ${qScore}こ`;
+  speak(`第${qPos+1}問！ ${item.q}`);
+  elChoices.innerHTML="";
+  item.c.forEach((txt,i)=>{
+    const b=document.createElement('button');
+    b.className='choice'; b.textContent=txt;
+    b.onclick=()=>answer(i,b);
+    elChoices.appendChild(b);
+  });
+}
+function answer(i,btn){
+  const item=QUIZ[quizOrder[qPos]];
+  [...elChoices.children].forEach(b=>b.disabled=true);
+  if(i===item.a){
+    btn.classList.add('correct'); qScore++;
+    speak("せいかい！ "+item.ex,'seikai');
+  }else{
+    btn.classList.add('wrong');
+    elChoices.children[item.a].classList.add('correct');
+    speak(`おしい！ 正かいは「${item.c[item.a]}」だよ。`+item.ex);
+  }
+  elScore.textContent=`せいかい ${qScore}こ`;
+  elNext.textContent = (qPos===QUIZ.length-1) ? "けっかを 見る ▶" : "つぎへ ▶";
+  elNext.classList.remove('hidden');
+}
+elNext.onclick=()=>{
+  qPos++;
+  if(qPos>=QUIZ.length) showResult();
+  else showQuestion();
+};
+function showResult(){
+  elChoices.innerHTML=""; elNext.classList.add('hidden');
+  elProg.textContent=`おわり / 全${QUIZ.length}問`;
+  let msg;
+  if(qScore===QUIZ.length) msg=`ぜんぶ せいかい！ ${qScore}こ／${QUIZ.length}こ。きみは もう 水はかせだ！`;
+  else if(qScore>=7) msg=`${qScore}こ／${QUIZ.length}こ せいかい！ すごい、よく 知っているね！`;
+  else if(qScore>=4) msg=`${qScore}こ／${QUIZ.length}こ せいかい。いい ちょうし！ もう一回 やると もっと わかるよ。`;
+  else msg=`${qScore}こ／${QUIZ.length}こ。だいじょうぶ、「ものしり問答」で べんきょうして、もう一回 ちょうせんしてみよう！`;
+  speak(msg,'seikai');
+  const b=document.createElement('button');
+  b.className='choice'; b.textContent="もう一回 ちょうせんする 🔁";
+  b.onclick=startQuiz;
+  elChoices.appendChild(b);
+}
+
+// ===== ながれ図（処理の流れ） =====
+const FLOW=[
+  {nm:"着水井", c:21.5, s:19, e:24, color:"#9c7b4a", nigori:"とても にごっている", ex:"天理ダムの 水が さいしょに 入ってくる 場所。よごれを とる 薬「PAC」を 入れるよ。"},
+  {nm:"薬品混和池", c:29.5, s:26, e:33, color:"#a8884e", nigori:"にごっている", ex:"薬と 水を よ〜く 混ぜる 池。ばいきんを やっつける 消毒剤も 入れるよ。"},
+  {nm:"フロック形成池", c:40, s:34, e:46, color:"#b6a05f", nigori:"よごれが かたまってきた", ex:"よごれが くっついて「フロック」という 大きな かたまりに なるよ。"},
+  {nm:"沈でん池", c:53, s:47, e:59, color:"#8fbf9f", nigori:"だいぶ きれい", ex:"フロックが 池の そこに しずんで、上の 水が きれいに なるよ。"},
+  {nm:"ろ過池", c:66.5, s:60, e:73, color:"#86cdde", nigori:"ほぼ すきとおった", ex:"砂の 中を 通して、目に 見えない 小さな よごれまで とるよ。"},
+  {nm:"配水池", c:79.5, s:74, e:85, color:"#7fd0ec", nigori:"すきとおって きれい！", ex:"できあがった きれいな 水道水を ためておく 池。ここから みんなの 家へ！"}
+];
+const flowTrack=document.getElementById('flowTrack'),
+      flowLiquid=document.getElementById('flowLiquid'),
+      flowLabel=document.getElementById('flowLabel'),
+      flowImgWrap=document.getElementById('flowImgWrap'),
+      flowBand=document.getElementById('flowBand'),
+      flowBandLabel=document.getElementById('flowBandLabel');
+let flowPins=[];
+function selectStage(i){
+  const s=FLOW[i];
+  flowPins.forEach((p,j)=>p.classList.toggle('active',j===i));
+  [...flowTrack.children].forEach((c,j)=>c.classList.toggle('active',j===i));
+  flowBand.style.left=s.s+'%';
+  flowBand.style.width=(s.e-s.s)+'%';
+  flowBandLabel.textContent=`${i+1}　${s.nm}`;
+  flowBand.classList.add('show');
+  flowLiquid.style.background=s.color;
+  flowLabel.textContent=`水の よごれ：${s.nigori}`;
+  speak(`【${i+1}　${s.nm}】 ${s.ex}`);
+}
+function buildFlow(){
+  // イラスト上の番号ピン
+  flowImgWrap.querySelectorAll('.flow-pin').forEach(p=>p.remove());
+  flowPins=[];
+  FLOW.forEach((s,i)=>{
+    const pin=document.createElement('button');
+    pin.className='flow-pin'; pin.textContent=i+1; pin.style.left=s.c+'%';
+    pin.title=s.nm; pin.onclick=()=>selectStage(i);
+    flowImgWrap.appendChild(pin); flowPins.push(pin);
+  });
+  // 下のボタン
+  flowTrack.innerHTML="";
+  FLOW.forEach((s,i)=>{
+    const d=document.createElement('div');
+    d.className='flow-step';
+    d.innerHTML=`<span class="num">${i+1}</span><div class="nm">${s.nm}</div>`;
+    d.onclick=()=>selectStage(i);
+    flowTrack.appendChild(d);
+  });
+  // リセット
+  flowBand.classList.remove('show');
+  flowPins.forEach(p=>p.classList.remove('active'));
+  flowLiquid.style.background="#9c7b4a";
+  flowLabel.textContent="水の よごれ：①〜⑥を おしてみよう";
+}
+
+// ===== 水のたび =====
+const JOURNEY=[
+  {x:8,  color:"#9c7b4a", cap:"天理ダム", t:"やあ、ぼくは 水の つぶ。いまは 天理ダムの 中に いるよ。見て、まだ 茶色く にごっているでしょ？ これから みんなの 飲み水に なる 旅に 出るんだ！"},
+  {x:16, color:"#9c7b4a", cap:"導水路（はこばれ中）", t:"導水路（どうすいろ）という ながい 通り道を 通って、豊井浄水場へ しゅっぱつ！ 609mも あるんだって。まだ にごったままだよ。"},
+  {x:21.5, color:"#a8884e", cap:"① 着水井", t:"着水井に とうちゃく。あれ、PACって いう 薬を 入れられた！ ぼくの まわりの よごれが、くっつき始めたぞ。"},
+  {x:29.5, color:"#b6a05f", cap:"② 薬品混和池", t:"薬品混和池で ぐるぐる 混ぜられる。ばいきんを やっつける 消毒剤も 入ったよ。"},
+  {x:40, color:"#b09a55", cap:"③ フロック形成池", t:"フロック形成池で、まわりの よごれが あつまって「フロック」という 大きな かたまりに なったよ。"},
+  {x:53, color:"#8fbf9f", cap:"④ 沈でん池", t:"沈でん池では、その フロックが しずんでいく…。わぁ、ぼくの まわりが きゅうに きれいに なってきた！"},
+  {x:66.5, color:"#86cdde", cap:"⑤ ろ過池", t:"ろ過池の 砂（すな）の 中を、ゆっくり 通りぬける。目に 見えない 小さな よごれも、ここで さようなら。だいぶ すきとおってきた！"},
+  {x:73, color:"#7fd0ec", cap:"消毒（しょうどく）", t:"もう一度 消毒されて、ぼくは すっかり 安全な 水道水に なったよ！ ほら、こんなに すきとおった 水色に なった。もう そのまま 飲めるんだ。"},
+  {x:79.5, color:"#7fd0ec", cap:"⑥ 配水池", t:"配水池で ひとやすみ。ここから、みんなの 家へ 出発の じゅんびを するよ。"},
+  {x:93, color:"#5ec3ea", cap:"みんなの 家へ！", t:"水道管を 通って…じゃ口から こんにちは！ コップに そそがれて、きみに 飲んでもらえる。長い 旅、見てくれて ありがとう！"}
+];
+let jIdx=0;
+const jProg=document.getElementById('journeyProg'),
+      jPrev=document.getElementById('journeyPrev'),
+      jNext=document.getElementById('journeyNext'),
+      jDrop=document.getElementById('journeyDrop'),
+      jCap=document.getElementById('journeyCap'),
+      dropPath=document.getElementById('dropPath');
+function renderJourney(){
+  const s=JOURNEY[jIdx];
+  jDrop.style.left=s.x+'%';
+  dropPath.style.fill=s.color;
+  jCap.textContent=s.cap;
+  jProg.textContent=`場面 ${jIdx+1} / ${JOURNEY.length}`;
+  jPrev.style.visibility = jIdx===0 ? 'hidden' : 'visible';
+  jNext.textContent = jIdx===JOURNEY.length-1 ? "さいしょへ 🔁" : "つぎへ ▶";
+  speak(s.t);
+}
+jPrev.onclick=()=>{ if(jIdx>0){ jIdx--; renderJourney(); } };
+jNext.onclick=()=>{ if(jIdx<JOURNEY.length-1){ jIdx++; } else { jIdx=0; } renderJourney(); };
+
+// 水のたびのイラストは ながれ図と同じ画像を使う（重複なし）
+document.getElementById('journeyImg').src=document.querySelector('#flowImgWrap img').src;
+
+// 最初のあいさつ（ものしり問答モード）
+speak(GREET);
+</script>
+</body>
+</html>
